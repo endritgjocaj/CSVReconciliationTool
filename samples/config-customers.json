@@ -1,0 +1,16 @@
+{
+  "folderA": "./samples/folderA",
+  "folderB": "./samples/folderB",
+  "outputFolder": "./output",
+  "matchingRule": {
+    "matchingFields": [
+      "CustomerId"
+    ],
+    "caseSensitive": false,
+    "trim": true
+  },
+  "degreeOfParallelism": 4,
+  "separator": ",",
+  "hasHeaderRow": true
+}
+

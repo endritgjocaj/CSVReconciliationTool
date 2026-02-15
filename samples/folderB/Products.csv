@@ -1,0 +1,5 @@
+ProductId,ProductName,Category,Price
+PROD001,Laptop,Electronics,999.99
+PROD002,Mouse,Accessories,29.99
+PROD003,Keyboard,Accessories,79.99
+PROD006,Speaker,Audio,199.99

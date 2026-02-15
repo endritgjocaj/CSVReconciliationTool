@@ -1,0 +1,15 @@
+{
+  "folderA": "./samples/folderA",
+  "folderB": "./samples/folderB",
+  "outputFolder": "./output/orders",
+  "matchingRule": {
+    "matchingFields": [
+      "OrderId"
+    ],
+    "caseSensitive": false,
+    "trim": true
+  },
+  "degreeOfParallelism": 4,
+  "separator": ",",
+  "hasHeaderRow": true
+}
