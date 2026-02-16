@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CSVReconciliationTool.App.Services;
 
-public class FilePairProcessor
+public class FilePairProcessor : IFilePairProcessor
 {
     private readonly ICsvService _csvService;
     private readonly RecordCategorizer _categorizer;

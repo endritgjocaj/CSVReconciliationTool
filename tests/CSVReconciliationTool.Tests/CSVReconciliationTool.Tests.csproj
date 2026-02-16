@@ -24,4 +24,8 @@
     <ProjectReference Include="..\..\src\CSVReconciliationTool.App\CSVReconciliationTool.App.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
+
 </Project>

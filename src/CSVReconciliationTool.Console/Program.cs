@@ -38,7 +38,7 @@ internal class Program
             services.AddSingleton<SummaryReporter>();
 
             // Application services
-            services.AddSingleton<FilePairProcessor>();
+            services.AddSingleton<IFilePairProcessor, FilePairProcessor>();
             services.AddSingleton<IReconciliationService, ReconciliationService>();
 
             var serviceProvider = services.BuildServiceProvider();

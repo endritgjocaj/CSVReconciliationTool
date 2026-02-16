@@ -10,12 +10,12 @@ namespace CSVReconciliationTool.App.Services;
 public class ReconciliationService : IReconciliationService
 {
     private readonly ILogger<ReconciliationService> _logger;
-    private readonly FilePairProcessor _filePairProcessor;
+    private readonly IFilePairProcessor _filePairProcessor;
     private readonly SummaryReporter _summaryReporter;
 
     public ReconciliationService(
         ILogger<ReconciliationService> logger,
-        FilePairProcessor filePairProcessor,
+        IFilePairProcessor filePairProcessor,
         SummaryReporter summaryReporter)
     {
         _logger = logger;
