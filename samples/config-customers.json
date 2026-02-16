@@ -9,7 +9,7 @@
     "caseSensitive": false,
     "trim": true
   },
-  "degreeOfParallelism": 4,
+  "degreeOfParallelism": 5,
   "separator": ",",
   "hasHeaderRow": true
 }
