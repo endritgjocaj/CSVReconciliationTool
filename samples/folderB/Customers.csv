@@ -1,0 +1,5 @@
+CustomerId,FirstName,LastName,Email
+CUST001,John,Smith,john@example.com
+CUST002,Jane,Doe,jane@example.com
+CUST003,Bob,Johnson,bob@example.com
+CUST006,David,Lee,david@example.com

@@ -1,0 +1,6 @@
+OrderId,OrderDate,CustomerName,Amount
+ORD001,2024-01-10,John Smith,1500.00
+ORD002,2024-01-11,Jane Doe,2500.00
+ORD003,2024-01-12,Bob Johnson,1200.00
+ORD004,2024-01-13,Alice Williams,3000.00
+ORD005,2024-01-14,Charlie Brown,800.00
