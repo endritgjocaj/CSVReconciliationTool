@@ -36,7 +36,10 @@ internal class Program
             });
 
             // Infrastructure services (with interfaces for testability)
-            services.AddSingleton<ICsvService>(sp => new CsvService(config.Separator, config.HasHeaderRow));
+            services.AddSingleton<ICsvService>(sp => new CsvService(
+                config.Separator, 
+                config.HasHeaderRow, 
+                sp.GetRequiredService<ILogger<CsvService>>()));
             services.AddSingleton<IOutputWriter, OutputWriter>();
 
             // Business services

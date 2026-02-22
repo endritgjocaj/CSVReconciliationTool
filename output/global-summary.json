@@ -1,40 +1,22 @@
 {
   "FilePairResults": [
     {
-      "FileName": "Customers",
-      "TotalInFolderA": 5,
-      "TotalInFolderB": 4,
-      "MatchedCount": 3,
-      "OnlyInFolderACount": 2,
-      "OnlyInFolderBCount": 1,
-      "ProcessingTimeMs": 49
-    },
-    {
-      "FileName": "Invoices",
-      "TotalInFolderA": 5,
-      "TotalInFolderB": 4,
-      "MatchedCount": 3,
-      "OnlyInFolderACount": 2,
-      "OnlyInFolderBCount": 1,
-      "ProcessingTimeMs": 48
-    },
-    {
       "FileName": "Employees",
       "TotalInFolderA": 5,
       "TotalInFolderB": 3,
       "MatchedCount": 0,
       "OnlyInFolderACount": 0,
       "OnlyInFolderBCount": 0,
-      "ProcessingTimeMs": 49
+      "ProcessingTimeMs": 94
     },
     {
-      "FileName": "Orders",
+      "FileName": "Customers",
       "TotalInFolderA": 5,
       "TotalInFolderB": 4,
-      "MatchedCount": 0,
-      "OnlyInFolderACount": 0,
-      "OnlyInFolderBCount": 0,
-      "ProcessingTimeMs": 48
+      "MatchedCount": 3,
+      "OnlyInFolderACount": 2,
+      "OnlyInFolderBCount": 1,
+      "ProcessingTimeMs": 93
     },
     {
       "FileName": "Products",
@@ -43,7 +25,25 @@
       "MatchedCount": 0,
       "OnlyInFolderACount": 0,
       "OnlyInFolderBCount": 0,
-      "ProcessingTimeMs": 14
+      "ProcessingTimeMs": 93
+    },
+    {
+      "FileName": "Orders",
+      "TotalInFolderA": 5,
+      "TotalInFolderB": 4,
+      "MatchedCount": 0,
+      "OnlyInFolderACount": 0,
+      "OnlyInFolderBCount": 0,
+      "ProcessingTimeMs": 93
+    },
+    {
+      "FileName": "Invoices",
+      "TotalInFolderA": 5,
+      "TotalInFolderB": 4,
+      "MatchedCount": 3,
+      "OnlyInFolderACount": 2,
+      "OnlyInFolderBCount": 1,
+      "ProcessingTimeMs": 94
     }
   ],
   "TotalInFolderA": 25,
@@ -51,10 +51,10 @@
   "TotalMatched": 6,
   "TotalOnlyInFolderA": 4,
   "TotalOnlyInFolderB": 2,
-  "TotalProcessingTimeMs": 208,
+  "TotalProcessingTimeMs": 467,
   "SuccessfulPairs": 5,
   "FailedPairs": 0,
   "MissingFiles": 0,
-  "StartTime": "2026-02-16T00:21:51.7360785+01:00",
+  "StartTime": "2026-02-22T04:43:49.0800419+01:00",
   "EndTime": "0001-01-01T00:00:00"
 }

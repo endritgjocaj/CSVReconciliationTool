@@ -1,3 +1,4 @@
+using CSVReconciliationTool.App.Infrastructure;
 using CSVReconciliationTool.App.Interfaces;
 using CSVReconciliationTool.App.Models;
 using Microsoft.Extensions.Logging;
@@ -41,16 +42,17 @@ public class FilePairProcessor : IFilePairProcessor
                 return result;
             }
 
-            // Read - Load CSV records from both files
+            // Read - Load CSV records from both files and collect malformed rows
             _logger.LogInformation("Reading file pair: {FileName}", fileName);
-            var recordsA = await _csvService.ReadCsvAsync(pathA!);
-            var recordsB = await _csvService.ReadCsvAsync(pathB!);
+            var csvService = (CsvService)_csvService;
+            var resultA = csvService.ReadCsvWithErrors(pathA!);
+            var resultB = csvService.ReadCsvWithErrors(pathB!);
 
-            result.TotalInFolderA = recordsA.Count;
-            result.TotalInFolderB = recordsB.Count;
+            result.TotalInFolderA = resultA.ValidRecords.Count;
+            result.TotalInFolderB = resultB.ValidRecords.Count;
 
             // Categorize - Match records and identify differences
-            var categorized = _categorizer.Categorize(recordsA, recordsB, fileName);
+            var categorized = _categorizer.Categorize(resultA.ValidRecords, resultB.ValidRecords, fileName, resultA.MalformedRows, resultB.MalformedRows);
 
             result.MatchedCount = categorized.Matched.Count;
             result.OnlyInFolderACount = categorized.OnlyInFolderA.Count;

@@ -1,6 +1,6 @@
 using CSVReconciliationTool.App.Interfaces;
-using System.Reflection.PortableExecutable;
-using System.Runtime.Intrinsics.X86;
+using CSVReconciliationTool.App.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CSVReconciliationTool.App.Infrastructure;
 
@@ -11,11 +11,13 @@ public class CsvService : ICsvService
 {
     private readonly char _separator;
     private readonly bool _hasHeader;
+    private readonly ILogger<CsvService> _logger;
 
-    public CsvService(char separator = ',', bool hasHeader = true)
+    public CsvService(char separator = ',', bool hasHeader = true, ILogger<CsvService>? logger = null)
     {
         _separator = separator;
         _hasHeader = hasHeader;
+        _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<CsvService>.Instance;
     }
 
     public async Task<List<Dictionary<string, string>>> ReadCsvAsync(string filePath)
@@ -23,14 +25,20 @@ public class CsvService : ICsvService
         return await Task.Run(() => ReadCsv(filePath));
     }
 
-    // Reads a CSV file and converts it to a list of dictionaries (each row = dictionary of column -> value)
+    // Reads CSV and returns only valid records
     public List<Dictionary<string, string>> ReadCsv(string filePath)
     {
-        var records = new List<Dictionary<string, string>>();
+        return ReadCsvWithErrors(filePath).ValidRecords;
+    }
+
+    // Reads CSV and returns both valid records and malformed rows
+    public CsvReadResult ReadCsvWithErrors(string filePath)
+    {
+        var result = new CsvReadResult();
         var fileLines = File.ReadAllLines(filePath);
 
         if (fileLines.Length == 0)
-            return records;
+            return result;
 
         string[] columnNames;
         int dataStartRow;
@@ -38,8 +46,8 @@ public class CsvService : ICsvService
         // Determine column names from header row
         if (_hasHeader)
         {
-            columnNames = fileLines[0].Split(_separator); // Use first row as headers
-            dataStartRow = 1; // Start reading data from row 2
+            columnNames = fileLines[0].Split(_separator);
+            dataStartRow = 1;
         }
         else
         {
@@ -49,27 +57,40 @@ public class CsvService : ICsvService
             dataStartRow = 0;
         }
 
+        var fileName = Path.GetFileName(filePath);
+
         // Parse each data row into a dictionary
         for (int lineIndex = dataStartRow; lineIndex < fileLines.Length; lineIndex++)
         {
             var currentLine = fileLines[lineIndex];
             if (string.IsNullOrWhiteSpace(currentLine))
-                continue; // Skip empty lines
+                continue;
 
             var columnValues = currentLine.Split(_separator);
-            var record = new Dictionary<string, string>();
 
-            // Map each column name to its value
-            for (int colIndex = 0; colIndex < columnNames.Length; colIndex++)
+            // Track malformed rows separately
+            if (columnValues.Length != columnNames.Length)
             {
-                var value = colIndex < columnValues.Length ? columnValues[colIndex] : string.Empty;
-                record[columnNames[colIndex].Trim()] = value;
+                result.MalformedRows.Add(currentLine);
+                _logger.LogWarning(
+                    "Malformed row in '{FileName}' at line {LineNumber}: Expected {ExpectedColumns} columns, but found {ActualColumns}",
+                    fileName, lineIndex + 1, columnNames.Length, columnValues.Length);
+                continue; // Skip - don't add to valid records
             }
 
-            records.Add(record);
+            var record = new Dictionary<string, string>();
+            for (int colIndex = 0; colIndex < columnNames.Length; colIndex++)
+            {
+                record[columnNames[colIndex].Trim()] = columnValues[colIndex];
+            }
+
+            result.ValidRecords.Add(record);
         }
 
-        return records;
+        if (result.MalformedRows.Count > 0)
+            _logger.LogWarning("Total malformed rows in '{FileName}': {MalformedCount}", fileName, result.MalformedRows.Count);
+
+        return result;
     }
 
     // Writes a list of dictionaries to a CSV file (each dictionary = one row)

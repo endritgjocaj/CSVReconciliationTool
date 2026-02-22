@@ -15,11 +15,13 @@ public class RecordCategorizer
         _logger = logger;
     }
 
-    // Categorizes records: Generate match keys -> Compare -> Return(Matched, OnlyInA, OnlyInB)
+    // Categorizes records: Generate match keys -> Compare -> Return(Matched, OnlyInA, OnlyInB, Errors)
     public CategorizedRecords Categorize(
         List<Dictionary<string, string>> recordsA,
         List<Dictionary<string, string>> recordsB,
-        string fileName)
+        string fileName,
+        List<string> malformedRowsA = null,
+        List<string> malformedRowsB = null)
     {
         var keysA = new Dictionary<string, Dictionary<string, string>>();
         var invalidCountA = 0;
@@ -82,6 +84,11 @@ public class RecordCategorizer
             }
         }
 
-        return new CategorizedRecords(matchedRecords, onlyInFolderARecords, onlyInFolderBRecords);
+        return new CategorizedRecords(
+            matchedRecords, 
+            onlyInFolderARecords, 
+            onlyInFolderBRecords,
+            malformedRowsA ?? new List<string>(),
+            malformedRowsB ?? new List<string>());
     }
 }
