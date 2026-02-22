@@ -48,21 +48,12 @@ public class OutputWriter : IOutputWriter
         await File.WriteAllTextAsync(summaryPath, json);
     }
 
-    private HashSet<string> GetAllUniqueColumns(CategorizedRecords categorized)
-    {
-        var columns = new HashSet<string>();
-
-        // Collect all column names from all records
-        foreach (var record in categorized.Matched.Concat(categorized.OnlyInFolderA).Concat(categorized.OnlyInFolderB))
-        {
-            foreach (var key in record.Keys)
-            {
-                columns.Add(key);
-            }
-        }
-
-        return columns;
-    }
+    private HashSet<string> GetAllUniqueColumns(CategorizedRecords categorized) =>
+        categorized.Matched
+            .Concat(categorized.OnlyInFolderA)
+            .Concat(categorized.OnlyInFolderB)
+            .SelectMany(r => r.Keys)
+            .ToHashSet();
 
     private List<Dictionary<string, string>> NormalizeRecords(List<Dictionary<string, string>> records, HashSet<string> allColumns)
     {

@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using CSVReconciliationTool.App.Helpers;
 using CSVReconciliationTool.App.Interfaces;
 using CSVReconciliationTool.App.Models;
@@ -57,7 +55,7 @@ public class ReconciliationService : IReconciliationService
             await Parallel.ForEachAsync(filePairs, parallelOptions, async (pair, ct) =>
             {
                 // Process each file pair in parallel - on its own thread
-                var pairResult = await _filePairProcessor.ReconcileAsync(pair.Key, pair.Value.Item1, pair.Value.Item2, config.OutputFolder);
+                var pairResult = await _filePairProcessor.ReconcileAsync(pair.Key, pair.Value.PathA, pair.Value.PathB, config.OutputFolder);
 
                 lock (lockObj) // Only ONE thread can enter at a time to prevent updating the same result object simultaneously
                 {

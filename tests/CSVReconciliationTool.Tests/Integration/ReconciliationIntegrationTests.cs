@@ -68,9 +68,8 @@ public class ReconciliationIntegrationTests : IDisposable
 
         var csvService = new CsvService(config.Separator, config.HasHeaderRow);
         var matchingService = new MatchingService(config.MatchingRule);
-        var categorizer = new RecordCategorizer(matchingService, NullLogger<RecordCategorizer>.Instance);
         var outputWriter = new OutputWriter(csvService);
-        var filePairProcessor = new FilePairProcessor(csvService, categorizer, outputWriter, NullLogger<FilePairProcessor>.Instance);
+        var filePairProcessor = new FilePairProcessor(csvService, outputWriter, NullLogger<FilePairProcessor>.Instance, matchingService);
         var summaryReporter = new SummaryReporter(NullLogger<SummaryReporter>.Instance);
         var sut = new ReconciliationService(NullLogger<ReconciliationService>.Instance, filePairProcessor, summaryReporter);
 

@@ -1,4 +1,4 @@
-using CSVReconciliationTool.App.Infrastructure;
+using System.Collections.Concurrent;
 using CSVReconciliationTool.App.Interfaces;
 using CSVReconciliationTool.App.Models;
 using Microsoft.Extensions.Logging;
@@ -8,20 +8,20 @@ namespace CSVReconciliationTool.App.Services;
 public class FilePairProcessor : IFilePairProcessor
 {
     private readonly ICsvService _csvService;
-    private readonly RecordCategorizer _categorizer;
     private readonly IOutputWriter _outputWriter;
     private readonly ILogger<FilePairProcessor> _logger;
+    private readonly IMatchingService _matchingService;
 
     public FilePairProcessor(
         ICsvService csvService,
-        RecordCategorizer categorizer,
         IOutputWriter outputWriter,
-        ILogger<FilePairProcessor> logger)
+        ILogger<FilePairProcessor> logger,
+        IMatchingService matchingService)
     {
         _csvService = csvService;
-        _categorizer = categorizer;
         _outputWriter = outputWriter;
         _logger = logger;
+        _matchingService = matchingService;
     }
 
     // Processes a single file pair and produces reconciliation results
@@ -42,17 +42,72 @@ public class FilePairProcessor : IFilePairProcessor
                 return result;
             }
 
-            // Read - Load CSV records from both files and collect malformed rows
+            // Read - Stream files and process in chunks with worker threads
             _logger.LogInformation("Reading file pair: {FileName}", fileName);
-            var csvService = (CsvService)_csvService;
-            var resultA = csvService.ReadCsvWithErrors(pathA!);
-            var resultB = csvService.ReadCsvWithErrors(pathB!);
 
-            result.TotalInFolderA = resultA.ValidRecords.Count;
-            result.TotalInFolderB = resultB.ValidRecords.Count;
+            // Step 1: Stream file B in chunks and build lookup dictionary
+            var keysB = new Dictionary<string, Dictionary<string, string>>();
+            var malformedRowsB = new ConcurrentQueue<string>();
+            await foreach (var chunk in _csvService.ReadCsvAsync(pathB!, malformedRowsB))
+            {
+                foreach (var record in chunk)
+                {
+                    if (_matchingService.HasMatchingFields(record))
+                    {
+                        var key = _matchingService.GenerateMatchKey(record);
+                        keysB[key] = record;
+                    }
+                }
+            }
 
-            // Categorize - Match records and identify differences
-            var categorized = _categorizer.Categorize(resultA.ValidRecords, resultB.ValidRecords, fileName, resultA.MalformedRows, resultB.MalformedRows);
+            var totalInB = keysB.Count;
+
+            // Thread-safe collections for parallel processing
+            var matched = new ConcurrentQueue<Dictionary<string, string>>();
+            var onlyInA = new ConcurrentQueue<Dictionary<string, string>>();
+            var matchedKeysInB = new ConcurrentDictionary<string, byte>();
+            var malformedRowsA = new ConcurrentQueue<string>();
+
+            // Step 2: Stream file A in chunks and process in parallel
+            await Parallel.ForEachAsync(
+                _csvService.ReadCsvAsync(pathA!, malformedRowsA),
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                (chunk, ct) =>
+                {
+                    foreach (var record in chunk)
+                    {
+                        if (!_matchingService.HasMatchingFields(record))
+                            continue;
+
+                        var key = _matchingService.GenerateMatchKey(record);
+                        if (keysB.TryGetValue(key, out _))
+                        {
+                            matched.Enqueue(record);
+                            matchedKeysInB.TryAdd(key, 0);
+                        }
+                        else
+                        {
+                            onlyInA.Enqueue(record);
+                        }
+                    }
+                    return ValueTask.CompletedTask;
+                });
+
+            // Step 3: Calculate onlyInB (keys in B not matched)
+            var onlyInB = keysB.Where(kv => !matchedKeysInB.ContainsKey(kv.Key))
+                               .Select(kv => kv.Value)
+                               .ToList();
+
+            result.TotalInFolderA = matched.Count + onlyInA.Count;
+            result.TotalInFolderB = totalInB;
+
+            var categorized = new CategorizedRecords(
+                [.. matched],
+                [.. onlyInA],
+                onlyInB,
+                malformedRowsA.ToList(),
+                malformedRowsB.ToList()
+            );
 
             result.MatchedCount = categorized.Matched.Count;
             result.OnlyInFolderACount = categorized.OnlyInFolderA.Count;

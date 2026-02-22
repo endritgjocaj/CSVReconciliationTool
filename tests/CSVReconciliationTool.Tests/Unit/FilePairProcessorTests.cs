@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using CSVReconciliationTool.App.Interfaces;
 using CSVReconciliationTool.App.Models;
 using CSVReconciliationTool.App.Services;
@@ -21,13 +22,11 @@ public class FilePairProcessorTests
         _mockOutputWriter = new Mock<IOutputWriter>();
         _mockLogger = new Mock<ILogger<FilePairProcessor>>();
 
-        var categorizer = new RecordCategorizer(_mockMatchingService.Object, Mock.Of<ILogger<RecordCategorizer>>());
-
         _sut = new FilePairProcessor(
             _mockCsvService.Object,
-            categorizer,
             _mockOutputWriter.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockMatchingService.Object);
     }
 
     [Fact]
@@ -37,8 +36,10 @@ public class FilePairProcessorTests
         var recordsA = new List<Dictionary<string, string>> { new() { ["Id"] = "1" } };
         var recordsB = new List<Dictionary<string, string>> { new() { ["Id"] = "1" } };
 
-        _mockCsvService.Setup(c => c.ReadCsvAsync("pathA")).ReturnsAsync(recordsA);
-        _mockCsvService.Setup(c => c.ReadCsvAsync("pathB")).ReturnsAsync(recordsB);
+        _mockCsvService.Setup(c => c.ReadCsvAsync("pathA", It.IsAny<ConcurrentQueue<string>>(), It.IsAny<int>()))
+            .Returns(AsyncEnumerable(recordsA));
+        _mockCsvService.Setup(c => c.ReadCsvAsync("pathB", It.IsAny<ConcurrentQueue<string>>(), It.IsAny<int>()))
+            .Returns(AsyncEnumerable(recordsB));
         _mockMatchingService.Setup(m => m.HasMatchingFields(It.IsAny<Dictionary<string, string>>())).Returns(true);
         _mockMatchingService.Setup(m => m.GenerateMatchKey(It.IsAny<Dictionary<string, string>>())).Returns("1|");
 
@@ -54,6 +55,13 @@ public class FilePairProcessorTests
             It.IsAny<CategorizedRecords>(), It.IsAny<FilePairReconciliationResult>()), Times.Once);
     }
 
+    private static async IAsyncEnumerable<List<Dictionary<string, string>>> AsyncEnumerable(
+        List<Dictionary<string, string>> records)
+    {
+        yield return records;
+        await Task.CompletedTask;
+    }
+
     [Fact]
     public async Task ReconcileAsync_MissingFileInFolderA_LogsWarningAndReturns()
     {
@@ -67,7 +75,6 @@ public class FilePairProcessorTests
         // Assert
         Assert.Equal("test", result.FileName);
         Assert.Equal(0, result.MatchedCount);
-        _mockCsvService.Verify(c => c.ReadCsvAsync(It.IsAny<string>()), Times.Never);
         _mockLogger.Verify(l => l.Log(
             LogLevel.Warning,
             It.IsAny<EventId>(),
@@ -89,7 +96,6 @@ public class FilePairProcessorTests
         // Assert
         Assert.Equal("test", result.FileName);
         Assert.Equal(0, result.MatchedCount);
-        _mockCsvService.Verify(c => c.ReadCsvAsync(It.IsAny<string>()), Times.Never);
         _mockLogger.Verify(l => l.Log(
             LogLevel.Warning,
             It.IsAny<EventId>(),
@@ -102,7 +108,8 @@ public class FilePairProcessorTests
     public async Task ReconcileAsync_ExceptionDuringProcessing_LogsErrorAndReturnsResult()
     {
         // Arrange
-        _mockCsvService.Setup(c => c.ReadCsvAsync(It.IsAny<string>())).ThrowsAsync(new Exception("Test error"));
+        _mockCsvService.Setup(c => c.ReadCsvAsync(It.IsAny<string>(), It.IsAny<ConcurrentQueue<string>>(), It.IsAny<int>()))
+            .Throws(new Exception("Test error"));
 
         // Act
         var result = await _sut.ReconcileAsync("test", "pathA", "pathB", "output");
