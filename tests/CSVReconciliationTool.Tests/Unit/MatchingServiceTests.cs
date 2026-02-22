@@ -1,7 +1,7 @@
 using CSVReconciliationTool.App.Models;
 using CSVReconciliationTool.App.Services;
 
-namespace CSVReconciliationTool.Tests.Services;
+namespace CSVReconciliationTool.Tests.Unit;
 
 public class MatchingServiceTests
 {

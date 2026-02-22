@@ -5,7 +5,7 @@ using CSVReconciliationTool.App.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace CSVReconciliationTool.Tests.Services;
+namespace CSVReconciliationTool.Tests.Unit;
 
 public class ReconciliationServiceTests
 {
