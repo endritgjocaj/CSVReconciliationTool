@@ -27,6 +27,9 @@ internal class Program
             Directory.CreateDirectory(config.OutputFolder);
             var logFilePath = Path.Combine(config.OutputFolder, "csv-reconciliation.log");
 
+            foreach (var oldLog in Directory.GetFiles(config.OutputFolder, "csv-reconciliation*.log"))
+                File.Delete(oldLog);
+
             var services = new ServiceCollection();
             services.AddLogging(builder =>
             {

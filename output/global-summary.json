@@ -1,13 +1,22 @@
 {
   "FilePairResults": [
     {
-      "FileName": "Employees",
-      "TotalInFolderA": 5,
-      "TotalInFolderB": 3,
+      "FileName": "Products",
+      "TotalInFolderA": 0,
+      "TotalInFolderB": 0,
       "MatchedCount": 0,
       "OnlyInFolderACount": 0,
       "OnlyInFolderBCount": 0,
-      "ProcessingTimeMs": 94
+      "ProcessingTimeMs": 59
+    },
+    {
+      "FileName": "Employees",
+      "TotalInFolderA": 0,
+      "TotalInFolderB": 0,
+      "MatchedCount": 0,
+      "OnlyInFolderACount": 0,
+      "OnlyInFolderBCount": 0,
+      "ProcessingTimeMs": 59
     },
     {
       "FileName": "Customers",
@@ -16,45 +25,36 @@
       "MatchedCount": 3,
       "OnlyInFolderACount": 2,
       "OnlyInFolderBCount": 1,
-      "ProcessingTimeMs": 93
-    },
-    {
-      "FileName": "Products",
-      "TotalInFolderA": 5,
-      "TotalInFolderB": 4,
-      "MatchedCount": 0,
-      "OnlyInFolderACount": 0,
-      "OnlyInFolderBCount": 0,
-      "ProcessingTimeMs": 93
-    },
-    {
-      "FileName": "Orders",
-      "TotalInFolderA": 5,
-      "TotalInFolderB": 4,
-      "MatchedCount": 0,
-      "OnlyInFolderACount": 0,
-      "OnlyInFolderBCount": 0,
-      "ProcessingTimeMs": 93
+      "ProcessingTimeMs": 59
     },
     {
       "FileName": "Invoices",
-      "TotalInFolderA": 5,
+      "TotalInFolderA": 4,
       "TotalInFolderB": 4,
-      "MatchedCount": 3,
+      "MatchedCount": 2,
       "OnlyInFolderACount": 2,
-      "OnlyInFolderBCount": 1,
-      "ProcessingTimeMs": 94
+      "OnlyInFolderBCount": 2,
+      "ProcessingTimeMs": 59
+    },
+    {
+      "FileName": "Orders",
+      "TotalInFolderA": 0,
+      "TotalInFolderB": 0,
+      "MatchedCount": 0,
+      "OnlyInFolderACount": 0,
+      "OnlyInFolderBCount": 0,
+      "ProcessingTimeMs": 59
     }
   ],
-  "TotalInFolderA": 25,
-  "TotalInFolderB": 19,
-  "TotalMatched": 6,
+  "TotalInFolderA": 9,
+  "TotalInFolderB": 8,
+  "TotalMatched": 5,
   "TotalOnlyInFolderA": 4,
-  "TotalOnlyInFolderB": 2,
-  "TotalProcessingTimeMs": 467,
+  "TotalOnlyInFolderB": 3,
+  "TotalProcessingTimeMs": 295,
   "SuccessfulPairs": 5,
   "FailedPairs": 0,
-  "MissingFiles": 0,
-  "StartTime": "2026-02-22T04:43:49.0800419+01:00",
+  "MissingFiles": 3,
+  "StartTime": "2026-02-23T03:49:01.7660093+01:00",
   "EndTime": "0001-01-01T00:00:00"
 }

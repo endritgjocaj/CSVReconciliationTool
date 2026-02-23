@@ -1,9 +1,9 @@
 {
   "FileName": "Invoices",
-  "TotalInFolderA": 5,
+  "TotalInFolderA": 4,
   "TotalInFolderB": 4,
-  "MatchedCount": 3,
+  "MatchedCount": 2,
   "OnlyInFolderACount": 2,
-  "OnlyInFolderBCount": 1,
+  "OnlyInFolderBCount": 2,
   "ProcessingTimeMs": 0
 }
