@@ -17,22 +17,33 @@ internal class Program
         }
 
         try
-        {   
+        {
             var config = ConfigurationLoader.Load(args[0]);
             config.FolderA = Path.GetFullPath(args[1]);
             config.FolderB = Path.GetFullPath(args[2]);
             config.OutputFolder = Path.GetFullPath(args[3]);
 
+            // Create output directory and setup log file
+            Directory.CreateDirectory(config.OutputFolder);
+            var logFilePath = Path.Combine(config.OutputFolder, "csv-reconciliation.log");
+
             var services = new ServiceCollection();
-            services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Information));
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.AddFile(logFilePath);
+                builder.SetMinimumLevel(LogLevel.Information);
+            });
 
             // Infrastructure services (with interfaces for testability)
-            services.AddSingleton<ICsvService>(sp => new CsvService(config.Separator, config.HasHeaderRow));
+            services.AddSingleton<ICsvService>(sp => new CsvService(
+                config.Separator, 
+                config.HasHeaderRow, 
+                sp.GetRequiredService<ILogger<CsvService>>()));
             services.AddSingleton<IOutputWriter, OutputWriter>();
 
             // Business services
             services.AddSingleton<IMatchingService>(sp => new MatchingService(config.MatchingRule));
-            services.AddSingleton<RecordCategorizer>();
 
             // Helpers
             services.AddSingleton<SummaryReporter>();
@@ -45,11 +56,10 @@ internal class Program
             var engine = serviceProvider.GetRequiredService<IReconciliationService>();
 
             var result = await engine.ReconcileAsync(config);
+            await serviceProvider.DisposeAsync();
 
             if (result.FailedPairs > 0)
                 Environment.Exit(1);
-
-            await serviceProvider.DisposeAsync();
         }
         catch (Exception ex)
         {

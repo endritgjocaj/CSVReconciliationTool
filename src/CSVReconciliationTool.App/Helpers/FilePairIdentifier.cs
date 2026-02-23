@@ -5,13 +5,13 @@ namespace CSVReconciliationTool.App.Helpers;
 /// </summary>
 public static class FilePairIdentifier
 {
-    public static Dictionary<string, Tuple<string?, string?>> IdentifyFilePairs(
+    public static Dictionary<string, (string? PathA, string? PathB)> IdentifyFilePairs(
         string folderAPath,
         string folderBPath,
         List<string> folderAFiles,
         List<string> folderBFiles)
     {
-        var pairs = new Dictionary<string, Tuple<string?, string?>>();
+        var pairs = new Dictionary<string, (string? PathA, string? PathB)>();
 
         // Process all files from FolderA
         foreach (var file in folderAFiles)
@@ -22,7 +22,7 @@ public static class FilePairIdentifier
             var baseName = Path.GetFileNameWithoutExtension(file);
             var pathA = Path.Combine(folderAPath, file);
             var pathB = folderBFiles.Contains(file) ? Path.Combine(folderBPath, file) : null;
-            pairs[baseName] = new Tuple<string?, string?>(pathA, pathB);
+            pairs[baseName] = (pathA, pathB);
             // eg. "employees", ("folderA/employees.csv", "folderB/employees.csv")
         }
 
@@ -34,7 +34,7 @@ public static class FilePairIdentifier
             if (!pairs.ContainsKey(baseName))
             {
                 var pathB = Path.Combine(folderBPath, file);
-                pairs[baseName] = new Tuple<string?, string?>(null, pathB);
+                pairs[baseName] = (null, pathB);
             }
         }
 

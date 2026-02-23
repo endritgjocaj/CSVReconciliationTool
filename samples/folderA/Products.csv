@@ -1,6 +1,6 @@
 ProductId,ProductName,Category,Price
 PROD001,Laptop,Electronics,999.99
 PROD002,Mouse,Accessories,29.99
-PROD003,Keyboard,Accessories,79.99
+PROD003,Keyboard,Accessories
 PROD004,Monitor,Electronics,399.99
 PROD005,Headphones,Accessories,149.99

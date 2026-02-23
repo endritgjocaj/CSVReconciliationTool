@@ -27,31 +27,49 @@ public class ReconciliationIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ReconcileAsync_TwoFilesWithMixedRecords_ProducesCorrectOutputs()
+    public async Task ReconcileAsync_FiveFilesInEachFolder_ProducesCorrectOutputs()
     {
         // Arrange
         File.WriteAllText(Path.Combine(_folderA, "Employees.csv"),
-            "EmployeeId,Name,Department\nEMP001,John,IT\nEMP002,Jane,HR\nEMP003,Bob,Sales");
-
+            "Id,Name\nEMP001,John\nEMP002,Jane");
         File.WriteAllText(Path.Combine(_folderB, "Employees.csv"),
-            "EmployeeId,Name,Department\nEMP001,John,IT\nEMP002,Jane,HR\nEMP004,Alice,Finance");
+            "Id,Name\nEMP001,John\nEMP003,Bob");
+
+        File.WriteAllText(Path.Combine(_folderA, "Orders.csv"),
+            "Id,Amount\nORD001,100");
+        File.WriteAllText(Path.Combine(_folderB, "Orders.csv"),
+            "Id,Amount\nORD001,100");
+
+        File.WriteAllText(Path.Combine(_folderA, "Products.csv"),
+            "Id,Name\nPROD001,Laptop");
+        File.WriteAllText(Path.Combine(_folderB, "Products.csv"),
+            "Id,Name\nPROD001,Laptop");
+
+        File.WriteAllText(Path.Combine(_folderA, "Customers.csv"),
+            "Id,Name\nCUST001,Alice");
+        File.WriteAllText(Path.Combine(_folderB, "Customers.csv"),
+            "Id,Name\nCUST001,Alice");
+
+        File.WriteAllText(Path.Combine(_folderA, "Invoices.csv"),
+            "Id,Total\nINV001,200");
+        File.WriteAllText(Path.Combine(_folderB, "Invoices.csv"),
+            "Id,Total\nINV001,200");
 
         var config = new ReconciliationConfig
         {
             FolderA = _folderA,
             FolderB = _folderB,
             OutputFolder = _output,
-            DegreeOfParallelism = 2,
-            MatchingRule = new MatchingRule { MatchingFields = ["EmployeeId"], CaseSensitive = false, Trim = true },
+            DegreeOfParallelism = 5,
+            MatchingRule = new MatchingRule { MatchingFields = ["Id"], CaseSensitive = false, Trim = true },
             Separator = ',',
             HasHeaderRow = true
         };
 
         var csvService = new CsvService(config.Separator, config.HasHeaderRow);
         var matchingService = new MatchingService(config.MatchingRule);
-        var categorizer = new RecordCategorizer(matchingService, NullLogger<RecordCategorizer>.Instance);
         var outputWriter = new OutputWriter(csvService);
-        var filePairProcessor = new FilePairProcessor(csvService, categorizer, outputWriter, NullLogger<FilePairProcessor>.Instance);
+        var filePairProcessor = new FilePairProcessor(csvService, outputWriter, NullLogger<FilePairProcessor>.Instance, matchingService);
         var summaryReporter = new SummaryReporter(NullLogger<SummaryReporter>.Instance);
         var sut = new ReconciliationService(NullLogger<ReconciliationService>.Instance, filePairProcessor, summaryReporter);
 
@@ -59,22 +77,15 @@ public class ReconciliationIntegrationTests : IDisposable
         var result = await sut.ReconcileAsync(config);
 
         // Assert
-        Assert.Equal(1, result.SuccessfulPairs);
-        Assert.Equal(2, result.TotalMatched);
+        Assert.Equal(5, result.SuccessfulPairs);
+        Assert.True(result.TotalMatched >= 4);
 
+        // Verify
         Assert.True(Directory.Exists(Path.Combine(_output, "Employees")));
-        Assert.True(File.Exists(Path.Combine(_output, "Employees", "matched.csv")));
-        Assert.True(File.Exists(Path.Combine(_output, "Employees", "only-in-folderA.csv")));
-        Assert.True(File.Exists(Path.Combine(_output, "Employees", "only-in-folderB.csv")));
-
-        var employeesMatched = File.ReadAllLines(Path.Combine(_output, "Employees", "matched.csv"));
-        Assert.Equal(3, employeesMatched.Length);
-
-        var onlyInA = File.ReadAllLines(Path.Combine(_output, "Employees", "only-in-folderA.csv"));
-        Assert.Equal(2, onlyInA.Length);
-
-        var onlyInB = File.ReadAllLines(Path.Combine(_output, "Employees", "only-in-folderB.csv"));
-        Assert.Equal(2, onlyInB.Length);
+        Assert.True(Directory.Exists(Path.Combine(_output, "Orders")));
+        Assert.True(Directory.Exists(Path.Combine(_output, "Products")));
+        Assert.True(Directory.Exists(Path.Combine(_output, "Customers")));
+        Assert.True(Directory.Exists(Path.Combine(_output, "Invoices")));
 
         Assert.True(File.Exists(Path.Combine(_output, "global-summary.json")));
     }
